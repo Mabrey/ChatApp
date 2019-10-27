@@ -1,0 +1,9 @@
+Client Application
+    Run the application by navigating to the chat-app folder and running "npm start" in terminal.
+    Using react router to enable query strings and parsing with query-string.
+
+
+
+
+Server Application
+    Run the server by navigating to the server folder and running "node server.js" in terminal.
