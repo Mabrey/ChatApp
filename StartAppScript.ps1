@@ -4,7 +4,7 @@ invoke-expression 'cmd /c start powershell -NoExit -Command {
     cd server;
     node server.js;
     }';
-cd chat-app
+cd client
 Write-Host "Current script directory is $ScriptDir"
 npm start
 Read-Host -Prompt "Press Enter to exit"
