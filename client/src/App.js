@@ -2,26 +2,40 @@ import React, {Component} from 'react';
 import queryString from 'query-string';
 import './App.css';
 import Chatbox from './Components/Chatbox';
+import HomeContainer from './Components/HomeContainer';
 
 class App extends Component {
-  state = {
+  constructor(props){
+    super(props);
+    this.state = {
       data: null,
       requestID: null,
-      user: null,
+      userID: null,
       messages: [],
-  };
+      currentlyInLobby: (this.props.location.search
+        ? true
+        : false),
+      lobby: (this.props.location.search
+        ? queryString.parse(this.props.location.search).game
+        : ''),
+    };
+  }
 
   ws = new WebSocket('ws://localhost:5000')
-  
+
   componentDidMount() {
       // Call our fetch function below once the component mounts
-    this.apiRes()
-      .then(res => this.setState({ data: res.express }))
-      .catch(err => console.log(err));
+    // this.apiRes()
+    //   .then(res => this.setState({ data: res.express }))
+    //   .catch(err => console.log(err));
 
     // this.getUserID()
     //   .then(res=> this.setState({user: res.express}))
     //   .catch(err=> console.log(err));
+
+    let userID;
+    this.getUserID().then(res => this.setState({...this.setState, userID: res}));
+
 
     this.ws.onopen = () =>{
       console.log('connected to ws!');
@@ -40,27 +54,29 @@ class App extends Component {
       console.log('disconnected');
     }
 
-    const lobby = queryString.parse(this.props.location.search);
-    console.log(lobby.game);
+    // this.setState(() => ({...this.state, lobby: 'eh'}));
+    console.log(this.state.lobby);
   }
 
-componentDidUpdate = () => {
-  console.log(this.state.messages);
-}
+  componentDidUpdate = () => {
+    console.log(this.state.messages);
+  }
 
-  apiRes = async () => {
-    const response = await fetch('/express_backend');
-
-    const body = await response.json();
-
-    if(response.status !== 200){
-      throw Error(body.message)
-    }
-    return body;
-  };
-
+  //Returns a unique id to identify this user.
   getUserID = async () => {
-    const response = await fetch('/get_user_number');
+    const response = await fetch('/create_user_id');
+    const body = await response.json();
+
+    if(response.status !== 200){
+      throw Error(body.message)
+    }
+    console.log(body.userID);
+    return body.userID;
+  };
+
+  //returns url to request a WS connection.
+  getWebsocketURL = async () => {
+    const response = await fetch('/get_websocket_url');
     const body = await response.json();
 
     if(response.status !== 200){
@@ -68,19 +84,19 @@ componentDidUpdate = () => {
     }
 
     return body;
-  };
+  }
 
-  // apiRes2 = async () => {
-  //   const response = await fetch('/');
+  //returns a room id and tells the server to group this user into a party.
+  createRoom = async () => {
+    const response = await fetch('/create_room');
+    const body = await response.json();
 
-  //   const body = await response.json();
+    if(response.status !== 200){
+      throw Error(body.message)
+    }
 
-  //   if(response.status !== 200){
-  //     throw Error(body.message)
-  //   }
-  //   return body;
-  // }
-
+    return body;
+  }
 
   handleChange = (event) => {
     this.setState({outgoingMessage: event.target.value});
@@ -94,17 +110,42 @@ componentDidUpdate = () => {
     })
   }
 
+  createLobby = async () => {
+    const response = await fetch(`/create_room?userID=${this.state.userID}`);
+    const body = await response.json();
+
+    if(response.status !== 200){
+      throw Error(body.message)
+    }
+
+    this.setState({...this.state, gameID: body.gameID});
+    //render the chatbox and connect to websocket
+
+    return body;
+  }
+
+  joinLobby = () => {
+    //create text box to input lobby info
+  }
+
+  changeLobbyState = () =>{
+    this.setState({...this.state, currentlyInLobby: !this.state.currentlyInLobby})
+  }
+
   render(){
     return (
       <div className="App">
         <header className="App-header">
-          <p>{this.state.data}</p>
-          <p>{this.state.user}</p>
-          <input type='text' onChange={this.handleChange} value ={this.state.outgoingMessage} />
-          <button onClick={this.handleSubmit}>Submit</button>
-          <p>{this.state.dataFromServer}</p>
-          
-          <Chatbox ws={this.ws} messages={this.state.messages}/>
+          {(!this.state.currentlyInLobby)
+            ? <HomeContainer enterLobby={this.changeLobbyState}/>
+            : <Chatbox
+                ws={this.ws}
+                messages={this.state.messages}
+                handleChange={this.handleChange}
+                handleSubmit={this.handleSubmit}
+                outgoingMessage={this.state.outgoingMessage}/>
+          }
+          <h1>{this.state.userID}</h1>
         </header>
       </div>
     );

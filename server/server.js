@@ -55,7 +55,8 @@ app.get('/create_user_id', (req, res) => {
 
 app.get('/create_room', (req, res) => {
     let roomID = shortid.generate();
-    let member = member(req.memberID);
-    let room = room(req.clientID, roomID)
+    let member = member(req.query.userID);
+    let room = room(req.query.userID, roomID)
     res.send({roomID: `${roomID}`})
 });
+
