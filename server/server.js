@@ -9,26 +9,25 @@ const wss = new WebSocket.Server({server});
 
 let users = 0;
 
-let rooms = {};
+let rooms = [];
 
-let clients = {};
+let clients = [];
 
-// wss.on('connection', (ws) => {
-//     ws.on('message', (message) =>{
-//         console.log('recieved: %s', message);
-//         ws.send(`Hello, you sent -> ${message}`);
-//     });
-//     ws.send('Hi, I am a ws server!');
-// });
-
-let room = (member, id) => {
-    return {member:{member}, roomID: id}
+let room = (user, id) => {
+    return {users:{user}, roomID: id}
 }
 
-let member = (memberID, connection='') => {
-    return {memberID: memberID, connection: connection}
+let user = (userID, connection='') => {
+    return {userID: userID, connection: connection}
 }
 
+let addRoom = (room) => {
+    rooms.push(room);
+}
+
+let createUserID = () => {
+    return shortid.generate();
+}
 
 wss.on('connection', (ws, req) => {
     ws.on('message', function incoming(message){
@@ -38,7 +37,11 @@ wss.on('connection', (ws, req) => {
             }
         } )
     });
-    ws.send('Hi, I am a ws server!');
+
+    let client = user(createUserID(), ws);
+    clients.push(client);
+    ws.send(JSON.stringify({clientID: client.userID}));
+
 });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
@@ -48,15 +51,22 @@ app.get('/express_backend', (req, res) => {
     res.send({express: 'Your Express Backend Works'});
 });
 
-app.get('/create_user_id', (req, res) => {
-    let userID = shortid.generate();
-    res.send({userID: `${userID}`})
-});
+app.get('/get_user_id', (req,res) => {
+
+})
 
 app.get('/create_room', (req, res) => {
     let roomID = shortid.generate();
-    let member = member(req.query.userID);
-    let room = room(req.query.userID, roomID)
-    res.send({roomID: `${roomID}`})
+    let user = clients.filter(user => user === req.query.userID);
+    let userRoom = room(user, roomID);
+    addRoom(userRoom);
+    console.log(userRoom);
+    res.send({roomID: `${roomID}`});
 });
 
+app.get('/join_room', (req, res) => {
+    let roomID = req.query.roomID;
+    let member = member(req.query.userID);
+    rooms[roomID].members.push(member);
+    res.send({roomID: `${roomID}`})
+});

@@ -4,20 +4,28 @@ import Home from './Home';
 export default class HomeContainer extends Component {
 
     enterLobby = this.props.enterLobby;
+    createLobby = this.props.createLobby;
+    // joinLobby = this.props.joinLobby;
+    joiningLobbyState = false;
 
-    createLobby = () =>{
-        this.enterLobby();
-        console.log("Create Lobby!")
+    state = {
+        joiningLobby : false,
     }
+
+    // createLobby = () =>{
+    //     this.enterLobby();
+    //     console.log("Create Lobby!")
+    // }
 
     joinLobby = () => {
-        this.enterLobby();
-        console.log("Join Lobby!")
+        this.setState({...this.state, joiningLobby: true,})
     }
+
+
 
     render() {
         return (
-            <Home createLobby={this.createLobby} joinLobby={this.joinLobby}/>
+            <Home joiningLobby={this.state.joiningLobby} createLobby={this.createLobby} joinLobby={this.joinLobby}/>
         )
     }
 }

@@ -1,11 +1,17 @@
 import React from 'react'
 
-const Home = ({createLobby, joinLobby}) => {
+const Home = ({joiningLobby, createLobby, joinLobby}) => {
+
     return(
-    <>
-        <button onClick={createLobby}>Create Lobby</button>
-        <button onClick={joinLobby}>Join Lobby</button>
-    </>
+        (joiningLobby)
+        ?   <>
+                <input type='text'/>
+                <button>Submit</button>
+            </>
+        :   <>
+                <button onClick={createLobby}>Create Lobby</button>
+                <button onClick={joinLobby}>Join Lobby</button>
+            </>
     )
 }
 

@@ -33,21 +33,25 @@ class App extends Component {
     //   .then(res=> this.setState({user: res.express}))
     //   .catch(err=> console.log(err));
 
-    let userID;
-    this.getUserID().then(res => this.setState({...this.setState, userID: res}));
-
-
-    this.ws.onopen = () =>{
+    this.ws.onopen = evt =>{
       console.log('connected to ws!');
     }
 
     this.ws.onmessage = evt =>{
-      const message = evt.data;
-      this.setState(state => {
+      const message = JSON.parse(evt.data);
+      // const message = evt.data;
+
+
+      if('clientID' in message){
+        console.log(message.clientID);
+        this.setState({...this.state, userID: message.clientID})
+      }
+      else{
+        this.setState(state => {
         const messages = [...state.messages, message];
         return{...state, messages}
-      })
-      console.log(message)
+        })
+      }
     }
 
     this.ws.onclose = () =>{
@@ -111,6 +115,7 @@ class App extends Component {
   }
 
   createLobby = async () => {
+    console.log(this.state.userID);
     const response = await fetch(`/create_room?userID=${this.state.userID}`);
     const body = await response.json();
 
@@ -118,14 +123,30 @@ class App extends Component {
       throw Error(body.message)
     }
 
-    this.setState({...this.state, gameID: body.gameID});
+    this.setState({...this.state, roomID: body.roomID});
+    this.changeLobbyState();
+
     //render the chatbox and connect to websocket
 
     return body;
   }
 
-  joinLobby = () => {
-    //create text box to input lobby info
+  joinLobby = async (lobbyID) => {
+    if(this.checkIfLobbyIsActive(lobbyID)){
+      const response = await fetch(`/join_room?userID=${this.state.userID}&lobbyID=${lobbyID}`);
+      const body = await response.json();
+
+      if(response.status !== 200){
+        throw Error(body.message)
+      }
+
+      this.setState({...this.state, gameID: body.gameID});
+      //render the chatbox and connect to websocket
+
+      return body;
+
+    }
+
   }
 
   changeLobbyState = () =>{
@@ -136,8 +157,9 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
+          <h1 id="appTitle">Chat App</h1>
           {(!this.state.currentlyInLobby)
-            ? <HomeContainer enterLobby={this.changeLobbyState}/>
+            ? <HomeContainer enterLobby={this.changeLobbyState} createLobby={this.createLobby}/>
             : <Chatbox
                 ws={this.ws}
                 messages={this.state.messages}
@@ -145,7 +167,7 @@ class App extends Component {
                 handleSubmit={this.handleSubmit}
                 outgoingMessage={this.state.outgoingMessage}/>
           }
-          <h1>{this.state.userID}</h1>
+
         </header>
       </div>
     );
