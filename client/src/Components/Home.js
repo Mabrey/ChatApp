@@ -1,16 +1,21 @@
 import React from 'react'
 
-const Home = ({joiningLobby, createLobby, joinLobby}) => {
+const Home = ({joiningLobbyState, selectJoinLobby, createLobby, joinLobby, handleRoomJoinText}) => {
+
+    // handleRoomJoinText = handleRoomJoinText;
+    // joinLobby = joinLobby;
 
     return(
-        (joiningLobby)
+        (joiningLobbyState)
         ?   <>
-                <input type='text'/>
-                <button>Submit</button>
+                <input
+                    type='text'
+                    onChange={handleRoomJoinText}/>
+                <button onClick={joinLobby}>Submit</button>
             </>
         :   <>
                 <button onClick={createLobby}>Create Lobby</button>
-                <button onClick={joinLobby}>Join Lobby</button>
+                <button onClick={selectJoinLobby}>Join Lobby</button>
             </>
     )
 }

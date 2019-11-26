@@ -13,12 +13,13 @@ class Chatbox extends Component {
     handleChange = this.props.handleChange;
 
     mapMesssageArrayToComponents = () =>
-        this.props.messages.map(message =>  <p>{message}</p>);
+        this.props.messages.map(message =>  <p>{`${message.author}: ${message.message}`}</p>);
 
 
     render() {
         return (
             <div id='Chatbox Container'>
+                <p>Room ID: {this.props.roomID}</p>
                 <input type='text' onChange={this.handleChange} value ={this.state.outgoingMessage} />
                 <button onClick={this.handleSubmit}>Submit</button>
                 <div>{this.mapMesssageArrayToComponents()}</div>

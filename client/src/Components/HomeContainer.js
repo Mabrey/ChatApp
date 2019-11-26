@@ -3,7 +3,7 @@ import Home from './Home';
 
 export default class HomeContainer extends Component {
 
-    enterLobby = this.props.enterLobby;
+    joinLobby = this.props.joinLobby;
     createLobby = this.props.createLobby;
     // joinLobby = this.props.joinLobby;
     joiningLobbyState = false;
@@ -17,15 +17,22 @@ export default class HomeContainer extends Component {
     //     console.log("Create Lobby!")
     // }
 
-    joinLobby = () => {
-        this.setState({...this.state, joiningLobby: true,})
+    selectJoinLobby = () => {
+        this.setState({...this.state, joiningLobbyState: true,})
     }
 
 
 
     render() {
         return (
-            <Home joiningLobby={this.state.joiningLobby} createLobby={this.createLobby} joinLobby={this.joinLobby}/>
+            <Home
+                joiningLobbyState={this.state.joiningLobbyState}
+                selectJoinLobby={this.selectJoinLobby}
+                createLobby={this.createLobby}
+                joinLobby={this.joinLobby}
+                roomID = {this.props.roomID}
+                handleRoomJoinText ={this.props.handleRoomJoinText}
+                />
         )
     }
 }

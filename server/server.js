@@ -14,7 +14,7 @@ let rooms = [];
 let clients = [];
 
 let room = (user, id) => {
-    return {users:{user}, roomID: id}
+    return {users:[user], roomID: id}
 }
 
 let user = (userID, connection='') => {
@@ -31,6 +31,7 @@ let createUserID = () => {
 
 wss.on('connection', (ws, req) => {
     ws.on('message', function incoming(message){
+        console.log(message);
         wss.clients.forEach(function each(client) {
             if(client !== ws && client.readyState === WebSocket.OPEN){
                 client.send(message);
@@ -57,16 +58,29 @@ app.get('/get_user_id', (req,res) => {
 
 app.get('/create_room', (req, res) => {
     let roomID = shortid.generate();
-    let user = clients.filter(user => user === req.query.userID);
+    let user = clients.find(userFilter => userFilter.userID === req.query.userID);
     let userRoom = room(user, roomID);
     addRoom(userRoom);
-    console.log(userRoom);
+    console.log(`Player ${user.userID} has created room ${roomID}`)
     res.send({roomID: `${roomID}`});
 });
 
 app.get('/join_room', (req, res) => {
     let roomID = req.query.roomID;
-    let member = member(req.query.userID);
-    rooms[roomID].members.push(member);
-    res.send({roomID: `${roomID}`})
+    let user = clients.find(userFilter => userFilter.userID === req.query.userID);
+    rooms.forEach((room, index) =>{
+        if(room.roomID === roomID){ rooms[index].users.push(user);}
+    })
+    // rooms[roomID].users.push(user);
+    res.send({roomJoinStatus: 'Success'})
 });
+
+app.get('/is_room_active', (req, res) => {
+    let roomID = req.query.roomID;
+    let foundRoom = false;
+    foundRoom = rooms.some((room) => room.roomID === roomID);
+    console.log(`Found room: ${foundRoom}`);
+
+    res.send({foundRoom: `${foundRoom}`});
+
+})

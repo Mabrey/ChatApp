@@ -4,6 +4,7 @@ import './App.css';
 import Chatbox from './Components/Chatbox';
 import HomeContainer from './Components/HomeContainer';
 
+
 class App extends Component {
   constructor(props){
     super(props);
@@ -12,6 +13,7 @@ class App extends Component {
       requestID: null,
       userID: null,
       messages: [],
+      roomID: '',
       currentlyInLobby: (this.props.location.search
         ? true
         : false),
@@ -46,11 +48,10 @@ class App extends Component {
         console.log(message.clientID);
         this.setState({...this.state, userID: message.clientID})
       }
-      else{
-        this.setState(state => {
-        const messages = [...state.messages, message];
-        return{...state, messages}
-        })
+
+      if('author' in message){
+        const messages = [...this.state.messages, message];
+        this.setState({...this.state, messages})
       }
     }
 
@@ -103,15 +104,34 @@ class App extends Component {
   }
 
   handleChange = (event) => {
-    this.setState({outgoingMessage: event.target.value});
+    this.setState({...this.state, outgoingMessage: event.target.value});
   }
 
   handleSubmit = () => {
-    this.ws.send(this.state.outgoingMessage);
+    let message = {
+      author: this.state.userID,
+      message: this.state.outgoingMessage
+    }
+
     this.setState(state => {
-      const messages = [...state.messages, this.state.outgoingMessage];
+      const messages = [...state.messages, message];
       return{...state, messages}
     })
+
+    let messageString = JSON.stringify(message);
+    this.ws.send(messageString);
+
+  }
+
+  checkIfLobbyIsActive = async (roomID) => {
+    const response = await fetch(`/is_room_active?roomID=${roomID}`);
+    const body = await response.json();
+
+    if(response.status !== 200){
+      throw Error(body.message)
+    }
+
+    return body;
   }
 
   createLobby = async () => {
@@ -124,24 +144,23 @@ class App extends Component {
     }
 
     this.setState({...this.state, roomID: body.roomID});
-    this.changeLobbyState();
-
-    //render the chatbox and connect to websocket
+    this.enterLobby();
 
     return body;
   }
 
-  joinLobby = async (lobbyID) => {
-    if(this.checkIfLobbyIsActive(lobbyID)){
-      const response = await fetch(`/join_room?userID=${this.state.userID}&lobbyID=${lobbyID}`);
+  joinLobby = async () => {
+    if(this.checkIfLobbyIsActive(this.state.roomID)){
+      const response = await fetch(`/join_room?userID=${this.state.userID}&roomID=${this.state.roomID}`);
       const body = await response.json();
 
       if(response.status !== 200){
         throw Error(body.message)
       }
+      console.log(body.roomJoinStatus);
 
-      this.setState({...this.state, gameID: body.gameID});
-      //render the chatbox and connect to websocket
+      this.enterLobby();
+
 
       return body;
 
@@ -153,19 +172,32 @@ class App extends Component {
     this.setState({...this.state, currentlyInLobby: !this.state.currentlyInLobby})
   }
 
+  enterLobby = () =>{
+    this.setState({...this.state, currentlyInLobby: true})
+  }
+
+  handleRoomJoinText = (event) =>{
+    this.setState({...this.state, roomID: event.target.value});
+  }
+
   render(){
     return (
       <div className="App">
         <header className="App-header">
           <h1 id="appTitle">Chat App</h1>
           {(!this.state.currentlyInLobby)
-            ? <HomeContainer enterLobby={this.changeLobbyState} createLobby={this.createLobby}/>
+            ? <HomeContainer
+                joinLobby={this.joinLobby}
+                createLobby={this.createLobby}
+                roomID={this.state.roomID}
+                handleRoomJoinText={this.handleRoomJoinText}/>
             : <Chatbox
                 ws={this.ws}
                 messages={this.state.messages}
                 handleChange={this.handleChange}
                 handleSubmit={this.handleSubmit}
-                outgoingMessage={this.state.outgoingMessage}/>
+                outgoingMessage={this.state.outgoingMessage}
+                roomID={this.state.roomID}/>
           }
 
         </header>
