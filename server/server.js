@@ -67,12 +67,23 @@ app.get('/create_room', (req, res) => {
 
 app.get('/join_room', (req, res) => {
     let roomID = req.query.roomID;
-    let user = clients.find(userFilter => userFilter.userID === req.query.userID);
-    rooms.forEach((room, index) =>{
-        if(room.roomID === roomID){ rooms[index].users.push(user);}
-    })
+    let user;
+    if(req.query.hasOwnProperty("userID")){
+        user = clients.find(userFilter => userFilter.userID === req.query.userID);
+        rooms.forEach((room, index) =>{
+            if(room.roomID === roomID){
+                rooms[index].users.push(user);
+                console.log(`Player ${user.userID} has joined room ${room.roomID}`)
+                res.send({roomJoinStatus: 'Success'});
+            }
+        })
+    }
+    else {
+        res.send({roomJoinStatus: 'Failed'});
+    }
+
     // rooms[roomID].users.push(user);
-    res.send({roomJoinStatus: 'Success'})
+
 });
 
 app.get('/is_room_active', (req, res) => {

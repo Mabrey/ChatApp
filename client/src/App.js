@@ -11,15 +11,10 @@ class App extends Component {
     this.state = {
       data: null,
       requestID: null,
-      userID: null,
+      userID: '',
       messages: [],
+      currentlyInLobby: false,
       roomID: '',
-      currentlyInLobby: (this.props.location.search
-        ? true
-        : false),
-      lobby: (this.props.location.search
-        ? queryString.parse(this.props.location.search).game
-        : ''),
     };
   }
 
@@ -45,8 +40,23 @@ class App extends Component {
 
 
       if('clientID' in message){
-        console.log(message.clientID);
-        this.setState({...this.state, userID: message.clientID})
+
+        if(this.props.location.search){
+          let query = queryString.parse(this.props.location.search);
+          if (query.game !== undefined){
+            this.setState({
+              ...this.state,
+              roomID: query.game,
+              userID: message.clientID,
+            }, () => this.joinLobby())
+          }
+        }
+        else {
+          this.setState({
+            ...this.state,
+            userID: message.clientID,
+          })
+        }
       }
 
       if('author' in message){
@@ -59,8 +69,7 @@ class App extends Component {
       console.log('disconnected');
     }
 
-    // this.setState(() => ({...this.state, lobby: 'eh'}));
-    console.log(this.state.lobby);
+    console.log(this.state.roomID);
   }
 
   componentDidUpdate = () => {
@@ -158,9 +167,9 @@ class App extends Component {
         throw Error(body.message)
       }
       console.log(body.roomJoinStatus);
-
-      this.enterLobby();
-
+      if(body.roomJoinStatus === "Success"){
+        this.enterLobby();
+      }
 
       return body;
 
