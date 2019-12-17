@@ -119,6 +119,7 @@ class App extends Component {
   handleSubmit = () => {
     let message = {
       author: this.state.userID,
+      roomID: this.state.roomID,
       message: this.state.outgoingMessage
     }
 

@@ -31,12 +31,23 @@ let createUserID = () => {
 
 wss.on('connection', (ws, req) => {
     ws.on('message', function incoming(message){
-        console.log(message);
-        wss.clients.forEach(function each(client) {
-            if(client !== ws && client.readyState === WebSocket.OPEN){
-                client.send(message);
+        let msgJSON = JSON.parse(message);
+        // console.log(message);
+        // console.log(rooms);
+        console.log(msgJSON.roomID);
+        let room = rooms.find((room) => room.roomID === msgJSON.roomID);
+        console.log(room);
+        room.users.forEach(user => {
+            if (user.connection !== ws && user.connection.readyState === WebSocket.OPEN){
+                user.connection.send(message);
             }
-        } )
+        })
+
+        // wss.clients.forEach(function each(client) {
+        //     if(client !== ws && client.readyState === WebSocket.OPEN){
+        //         client.send(message);
+        //     }
+        // } )
     });
 
     let client = user(createUserID(), ws);
@@ -73,7 +84,11 @@ app.get('/join_room', (req, res) => {
         rooms.forEach((room, index) =>{
             if(room.roomID === roomID){
                 rooms[index].users.push(user);
-                console.log(`Player ${user.userID} has joined room ${room.roomID}`)
+
+                console.log(`Player ${user.userID} has joined room ${room.roomID}`);
+                console.log(`Players in room ${room.roomID}: `);
+                rooms[index].users.forEach(user => {console.log(user.userID)});
+
                 res.send({roomJoinStatus: 'Success'});
             }
         })
