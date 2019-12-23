@@ -178,6 +178,30 @@ class App extends Component {
 
   }
 
+  leaveRoom = async () => {
+    const response = await fetch(`/leave_room?userID=${this.state.userID}&roomID=${this.state.roomID}`);
+    const body = await response.json();
+
+    if(response.status !== 200){
+      throw Error(body.message)
+    }
+    console.log(body.roomJoinStatus);
+    if(body.roomLeaveStatus === "Success"){
+      this.clearRoomInfo();
+    }
+
+    if(body.roomJoinStatus === "Failed"){
+      console.log (body.roomJoinStatus);
+    }
+    return body;
+
+
+  }
+
+  clearRoomInfo = () => {
+    this.setState({...this.state, currentlyInLobby: false, roomID: '', messages: []});
+  }
+
   changeLobbyState = () =>{
     this.setState({...this.state, currentlyInLobby: !this.state.currentlyInLobby})
   }
@@ -189,6 +213,8 @@ class App extends Component {
   handleRoomJoinText = (event) =>{
     this.setState({...this.state, roomID: event.target.value});
   }
+
+
 
   render(){
     return (
@@ -206,6 +232,7 @@ class App extends Component {
                 messages={this.state.messages}
                 handleChange={this.handleChange}
                 handleSubmit={this.handleSubmit}
+                leaveRoom={this.leaveRoom}
                 outgoingMessage={this.state.outgoingMessage}
                 roomID={this.state.roomID}/>
           }

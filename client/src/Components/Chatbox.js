@@ -15,13 +15,14 @@ class Chatbox extends Component {
 
     render() {
 
-        const {handleSubmit, handleChange} = this.props;
+        const {handleSubmit, handleChange, leaveRoom} = this.props;
 
         return (
             <div id='Chatbox Container'>
                 <p>Room ID: {this.props.roomID}</p>
                 <input type='text' onChange={handleChange} value ={this.state.outgoingMessage} />
                 <button onClick={handleSubmit}>Submit</button>
+                <button onClick={leaveRoom}>Leave</button>
                 <div>{this.mapMesssageArrayToComponents()}</div>
             </div>
          );

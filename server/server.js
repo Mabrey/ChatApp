@@ -97,9 +97,27 @@ app.get('/join_room', (req, res) => {
         res.send({roomJoinStatus: 'Failed'});
     }
 
-    // rooms[roomID].users.push(user);
-
 });
+
+app.get('/leave_room', (req, res) =>{
+    if(!req.query.hasOwnProperty('userID')
+    || !req.query.hasOwnProperty('roomID')){
+        res.send({roomLeaveStatus: 'Failed'});
+    }
+
+    let userID = req.query.userID;
+    let roomID = req.query.roomID;
+
+    rooms.forEach((room, index) => {
+        if(room.roomID === roomID){
+            let remainingUsers = rooms[index].users.filter( (user) => user !== userID)
+            rooms[index].users = remainingUsers;
+        }
+    });
+
+    res.send({roomLeaveStatus: 'Success'});
+
+})
 
 app.get('/is_room_active', (req, res) => {
     let roomID = req.query.roomID;
