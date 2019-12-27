@@ -21,14 +21,6 @@ class App extends Component {
   ws = new WebSocket('ws://localhost:5000')
 
   componentDidMount() {
-      // Call our fetch function below once the component mounts
-    // this.apiRes()
-    //   .then(res => this.setState({ data: res.express }))
-    //   .catch(err => console.log(err));
-
-    // this.getUserID()
-    //   .then(res=> this.setState({user: res.express}))
-    //   .catch(err=> console.log(err));
 
     this.ws.onopen = evt =>{
       console.log('connected to ws!');
@@ -69,12 +61,15 @@ class App extends Component {
       console.log('disconnected');
     }
 
-    console.log(this.state.roomID);
   }
+
+
 
   componentDidUpdate = () => {
     console.log(this.state.messages);
   }
+
+
 
   //Returns a unique id to identify this user.
   getUserID = async () => {
@@ -179,6 +174,7 @@ class App extends Component {
   }
 
   leaveRoom = async () => {
+    if (!this.state.currentlyInLobby) return;
     const response = await fetch(`/leave_room?userID=${this.state.userID}&roomID=${this.state.roomID}`);
     const body = await response.json();
 

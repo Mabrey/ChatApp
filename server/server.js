@@ -18,7 +18,7 @@ let room = (user, id) => {
 }
 
 let user = (userID, connection='') => {
-    return {userID: userID, connection: connection}
+    return {userID: userID, connection: connection, isAlive: true}
 }
 
 let addRoom = (room) => {
@@ -32,11 +32,7 @@ let createUserID = () => {
 wss.on('connection', (ws, req) => {
     ws.on('message', function incoming(message){
         let msgJSON = JSON.parse(message);
-        // console.log(message);
-        // console.log(rooms);
-        console.log(msgJSON.roomID);
         let room = rooms.find((room) => room.roomID === msgJSON.roomID);
-        console.log(room);
         room.users.forEach(user => {
             if (user.connection !== ws && user.connection.readyState === WebSocket.OPEN){
                 user.connection.send(message);
@@ -50,6 +46,13 @@ wss.on('connection', (ws, req) => {
         // } )
     });
 
+    ws.on('pong', () =>  {
+
+        let userIndex = clients.findIndex((user) => user.connection === ws);
+        console.log(`received pong from ${clients[userIndex].userID}!`)
+        clients[userIndex].isAlive = true;
+    })
+
     let client = user(createUserID(), ws);
     clients.push(client);
     ws.send(JSON.stringify({clientID: client.userID}));
@@ -57,6 +60,26 @@ wss.on('connection', (ws, req) => {
 });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
+
+let pingClients = () => {
+    clients.forEach((client, index)=>{
+        if (client.isAlive === false) {
+            console.log(`Terminating user ${client.userID} connection`);
+            client.connection.terminate();
+            clients.splice(index, 1);
+            return;
+        }
+
+        clients[index].isAlive = false;
+        client.connection.ping()
+    })
+};
+
+const interval = setInterval(pingClients, 5000);
+
+
+
+
 
 
 app.get('/express_backend', (req, res) => {
@@ -114,7 +137,7 @@ app.get('/leave_room', (req, res) =>{
             rooms[index].users = remainingUsers;
         }
     });
-
+    console.log(`Player ${userID} has left room ${roomID}`);
     res.send({roomLeaveStatus: 'Success'});
 
 })
