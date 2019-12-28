@@ -65,22 +65,24 @@ let pingClients = () => {
     clients.forEach((client, index)=>{
         if (client.isAlive === false) {
             console.log(`Terminating user ${client.userID} connection`);
+            rooms.forEach((room, index) => {
+                if(room.users.includes(client)){
+                    let filteredUsers = room.users.filter(user => user.userID != client.userID);
+                    rooms[index].users = filteredUsers;
+                }
+            });
+
             client.connection.terminate();
             clients.splice(index, 1);
             return;
         }
 
         clients[index].isAlive = false;
-        client.connection.ping()
+        client.connection.ping();
     })
 };
 
 const interval = setInterval(pingClients, 5000);
-
-
-
-
-
 
 app.get('/express_backend', (req, res) => {
     res.send({express: 'Your Express Backend Works'});
