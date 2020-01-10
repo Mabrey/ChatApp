@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import queryString from 'query-string';
-import './App.css';
+import './Styles/App.css';
 import Chatbox from './Components/Chatbox';
 import HomeContainer from './Components/HomeContainer';
 
@@ -215,25 +215,22 @@ class App extends Component {
   render(){
     return (
       <div className="App">
-        <header className="App-header">
-          <h1 id="appTitle">Chat App</h1>
-          {(!this.state.currentlyInLobby)
-            ? <HomeContainer
-                joinLobby={this.joinLobby}
-                createLobby={this.createLobby}
-                roomID={this.state.roomID}
-                handleRoomJoinText={this.handleRoomJoinText}/>
-            : <Chatbox
-                ws={this.ws}
-                messages={this.state.messages}
-                handleChange={this.handleChange}
-                handleSubmit={this.handleSubmit}
-                leaveRoom={this.leaveRoom}
-                outgoingMessage={this.state.outgoingMessage}
-                roomID={this.state.roomID}/>
-          }
-
-        </header>
+        <h1 id="appTitle">Chat App</h1>
+        {(!this.state.currentlyInLobby)
+          ? <HomeContainer
+              joinLobby={this.joinLobby}
+              createLobby={this.createLobby}
+              roomID={this.state.roomID}
+              handleRoomJoinText={this.handleRoomJoinText}/>
+          : <Chatbox
+              ws={this.ws}
+              messages={this.state.messages}
+              handleChange={this.handleChange}
+              handleSubmit={this.handleSubmit}
+              leaveRoom={this.leaveRoom}
+              outgoingMessage={this.state.outgoingMessage}
+              roomID={this.state.roomID}/>
+        }
       </div>
     );
   }

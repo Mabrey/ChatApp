@@ -1,0 +1,25 @@
+#ChatButtons{
+    grid-area: CenterGridColumn;
+}
+
+#LobbyButtons{
+    grid-area: CenterGridColumn;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.LobbyButton{
+    background-color: rgb(175, 175, 175);
+    border: none;
+    color: rgb(0, 0, 0);
+    padding: 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+}

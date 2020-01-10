@@ -1,0 +1,27 @@
+#ChatboxContainer{
+    grid-area: CenterGridColumn;
+    display: grid;
+    grid-template-rows: 1fr 9fr 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "ChatHeader"
+        "ChatMessages"
+        "ChatTypeAndSubmit";
+    justify-items: center;
+}
+
+#ChatHeader{
+    grid-area: ChatHeader;
+}
+
+#MessageContainer{
+    grid-area: ChatMessages;
+    width: 100%;
+    overflow-y: scroll;
+}
+
+#TextAndSubmitContainer{
+    grid-area: ChatTypeAndSubmit;
+}
+
+

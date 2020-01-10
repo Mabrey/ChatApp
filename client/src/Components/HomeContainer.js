@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Home from './Home';
+import "../Styles/Home.css";
 
 export default class HomeContainer extends Component {
 
